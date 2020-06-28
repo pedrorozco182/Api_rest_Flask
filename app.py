@@ -1,3 +1,7 @@
+
+#archivo creado por Peter_Code182 
+# Example from youtube for a api in flask whit marshmellow and sqlalchemy librarys
+
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -24,7 +28,6 @@ ma = Marshmallow(app)
 
 # product class
 
-
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
@@ -38,13 +41,11 @@ class Product(db.Model):
         self.price = price
         self.qty = qty
 
-# Prdduc Schema
-
+# Product Schema
 
 class ProductSchema(ma.Schema):
     class Meta:
         fields = ('id', 'name', 'description', 'price', 'qty')
-
 
 # init Schema
 product_schema = ProductSchema()
@@ -66,7 +67,13 @@ def add_product():
 
     return product_schema.jsonify(new_product)
 
-    #get 1 product
+#get one product
+
+@app.route('/product/<id>',methods=['GET'])
+def get_product(id):
+    product = Product.query.get(id)    
+    return product_schema.jsonify(product)
+
 #update a product
 
 @app.route('/product/<id>',methods=['PUT'])
@@ -83,18 +90,6 @@ def update_product(id):
 
     return product_schema.jsonify(product)
 
-@app.route('/product/<id>',methods=['GET'])
-def get_product(id):
-    product = Product.query.get(id)    
-    return product_schema.jsonify(product)
-
-#get all products
-
-@app.route('/product',methods=['GET'])
-def get_products():
-    all_products = Product.query.all()
-    result = products_schema.dump(all_products)
-    return jsonify(result)
 
 #delete product
 
@@ -104,6 +99,17 @@ def delet_product(id):
     db.session.delete(product)
     db.session.commit() 
     return product_schema.jsonify(product)
+
+
+#get all products
+
+@app.route('/product',methods=['GET'])
+def get_products():
+    all_products = Product.query.all()
+    result = products_schema.dump(all_products)
+    return jsonify(result)
+
+
 # Run Server
 if __name__ == '__main__':
     app.run(debug=True)
